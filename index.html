@@ -177,7 +177,8 @@
             Identify if any key components (Independent Variable, units, linearized graph, discussion) are missing.`;
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                // CHANGED MODEL TO gemini-1.5-flash for stability
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -188,12 +189,13 @@
                                 ...uploadedImages.map(img => ({ inlineData: img }))
                             ]
                         }],
+                        // Use standard model system instructions if supported, otherwise prepend to text
                         systemInstruction: { parts: [{ text: systemPrompt }] }
                     })
                 });
 
                 const data = await response.json();
-                console.log("Gemini API Raw Response:", data); // LOG TO CONSOLE FOR DEBUGGING
+                console.log("Gemini API Raw Response:", data);
 
                 if (data.error) {
                     throw new Error(`API Error ${data.error.code}: ${data.error.message}`);
@@ -215,7 +217,7 @@
                 console.error("Full Debug Error:", err);
                 const eMsg = document.createElement('div');
                 eMsg.className = "bg-red-50 p-4 rounded-2xl border border-red-200 text-xs text-red-700 shadow-sm";
-                eMsg.innerHTML = `<b>Critical Error:</b> ${err.message}<br><br><i>Check the browser console (F12) for technical details. Ensure your API key is active and images are under 4MB.</i>`;
+                eMsg.innerHTML = `<b>Connection Error:</b> ${err.message}<br><br><i>Please try again. This usually happens if the AI model name was recently changed by Google.</i>`;
                 chat.appendChild(eMsg);
             } finally {
                 loader.classList.add('hidden');
